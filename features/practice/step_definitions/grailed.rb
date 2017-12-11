@@ -219,33 +219,6 @@ And(/^I check for the cheapest listing price$/) do
   puts "We found our cheapest listing: #{url}"
 end
 
-
-Given(/^I identify a product in the search results page that takes you to a \/([^"]*) page$/) do |product_page_type|
-  step "I land on the shop category landing page and click on Shop All"
-  @product_cell = -1
-  i = 0
-  while @product_cell != i
-    product = all("ss-product-cell")[i]
-    within(product) do
-      find("div.product-cell-container").hover
-      @elem = find("a.detail-link")
-      href = @elem[:href]
-      puts "found href in cell #{i} - #{href}" if @verbose
-      page.execute_script "window.scrollBy(0,50)"
-      if href.include?("/#{product_page_type}/")
-        puts "found our cell - #{href}" if @verbose
-        @product_href = href
-        @product_cell = i
-        @product_id = first("meta", :visible=>false)[:'product-id']
-        @product_name = find("a.product-name").text
-        break
-      end
-    end
-    if @product_cell.eql? i then break else i+=1 end
-  end
-  step "I scroll down to see more products"
-end
-
 Then(/^I scroll down to see more products$/) do
   page.execute_script "window.scrollBy(0,3000)"
 end
