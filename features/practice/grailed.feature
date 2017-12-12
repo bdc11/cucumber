@@ -6,7 +6,8 @@ Scenario: A user searches for yeezys under footwear category and uses footwear s
   Given I visit grailed website
   And I click on the "footwear" category header
   Then I verify the "footwear" category is clicked under the category filter
-
+  # And I open a new tab
+@1
 Scenario: A user searches for yeezys under footwear category and uses footwear size filter
   Given I visit grailed website
   And I click on the "footwear" category header
@@ -14,6 +15,8 @@ Scenario: A user searches for yeezys under footwear category and uses footwear s
   When I search for "yeezy 700 waverunner" and I put sizes filter into view
   And I select size "11" within the "Footwear" filter
   And I check for the cheapest listing price
+  And I check the location of the item and shipping cost to "United States"
+  And I verify the seller feedback is good
 
 Scenario: A user searches for belts under accessories category and uses accessories size filter
   Given I visit grailed website
