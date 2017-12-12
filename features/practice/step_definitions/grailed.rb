@@ -2,6 +2,11 @@ require 'capybara/cucumber'
 require 'rails-i18n'
 require 'minitest'
 
+
+And(/^I open a new tab$/) do
+  find("div.feed").first("img", target="_blank").click
+end
+
 And(/^I visit grailed website$/) do
   selenium_init
   Capybara.app_host = @grailed_host
@@ -191,7 +196,7 @@ And(/^I check for the cheapest listing price$/) do
     len = listing_link.size
     browse_links = listing_link[i]
 
-    step "I scroll down to see more products"
+    # step "I scroll down to see more products"
 
     # puts i if @verbose
     # @a_href = browse_links[:href]  
@@ -202,6 +207,7 @@ And(/^I check for the cheapest listing price$/) do
     begin
       if assert browse_links.find("span", :text=>"#{@price_array.min}", :wait=>0)
         browse_links.click
+        # window_opened_by { browse_links.click }
         break
       end
     rescue
@@ -216,11 +222,38 @@ And(/^I check for the cheapest listing price$/) do
 
   end
   url = URI.parse(current_url)
-  puts "We found our cheapest listing: #{url}"
+  puts "We found our cheapest listing: \n#{url}"
 end
 
 Then(/^I scroll down to see more products$/) do
   page.execute_script "window.scrollBy(0,3000)"
+end
+
+And(/^I check the location of the item and shipping cost to "([^"]*)"$/) do |shipping|
+  puts "Checking the location of the item..." if @verbose
+  @seller_info = find("div.user-widget.medium", :wait=>0)
+  shipping_cost = find("div.listing-shipping")
+  scroll_to(shipping_cost)
+  seller_location = @seller_info.find("p.user-location")
+  puts seller_location.text if @verbose
+
+  puts "Checking shipping price..." if @verbose
+  shipping_cost = find("div.listing-shipping").find("div.item",:text=>shipping).find("div.amount")
+
+  puts "The item is located in #{seller_location.text} and shipping cost to #{shipping} is #{shipping_cost.text}"
+end
+
+And(/^I verify the seller feedback is good$/) do
+  assert @seller_info.find("a.green")
+  feedback = @seller_info.find("a.green").text 
+
+  feedback_check = feedback.gsub("/5","").gsub("Feedback","")
+
+  if ((feedback_check.to_i) >= 4)
+    puts "Seller has a feedback of #{feedback}!"
+  else
+    puts "BEWARE! Seller has a feedback of #{feedback}!"
+  end
 end
 
 ############helper############
@@ -228,6 +261,10 @@ def scroll_to(element)
   script = <<-JS
     arguments[0].scrollIntoView(true);
   JS
-
   Capybara.current_session.driver.browser.execute_script(script, element.native)
+end
+
+def open_new_tab
+  driver = Selenium::WebDriver.for:chrome
+  driver.keyboard.send_keys [:control, "t"]
 end
