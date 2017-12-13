@@ -20,29 +20,35 @@ And(/^I log into my grailed account$/) do
   step "I log into my grailed account from the cell"
 end
 
+And(/^I sign up as a new user$/) do
+  find("a.enter", :wait=>0).click
+  sleep 1
+  modal = find("div.ReactModal__Content")
+  modal.find("input[type='email']").set @user_email
+  modal.find("input[type='password']").set(@user_password).native.send_key(:enter)
+  find("a", :text=>"YES").click
+end
+
+
+Then(/^I verify my new account is created$/) do
+  confirm_signup = find("span.italic", :text=>@user_email) #checking that email on sign up page matches email we signed up with
+  assert_equal confirm_signup.text, @user_email
+
+  assert find("div.verify-email")
+  verify_email = find("span.bold", :text=>@user_email) #checking that email on verify page matches email we signed up with
+  assert_equal verify_email.text, @user_email
+end
+
+
 And(/^I click on the "([^"]*)" category header$/) do |header|
   puts "checking all top category headers..." if @verbose
+  category_header = ("div[data-reactid='.3.1.1.$#{header}'")
 
-  case header
-
-    when "outerwear" then find("div.sub-header-links").all("a")[0].click
-
-    when "tops" then find("div.sub-header-links").all("a")[1].click
-
-    when "bottoms" then find("div.sub-header-links").all("a")[2].click
-
-    when "footwear" then find("div.sub-header-links").all("a")[3].click
-
-    when "sneakers" then find("div.sub-header-links").all("a")[4].click
-
-    when "tailoring" then find("div.sub-header-links").all("a")[5].click
-
-    when "accessories" then find("div.sub-header-links").all("a")[6].click
-
+  if has_css? category_header
+    find(category_header).click
   else
     fail "You selected a category header that does not exist!"
-  end
-  
+  end  
 end
 
 Then(/^I verify the "([^"]*)" category is clicked under the category filter$/) do |category|
@@ -67,31 +73,12 @@ end
 
 And(/^I select size "([^"]*)" within the "([^"]*)" filter$/) do |size, filter|
   size_filter = find("div.sizes-wrapper")
-
   size_filter.first("span", :text=>filter).find("span.triangle").click
+  size_choice = ("p[data-reactid='.4.2.3.0.0.0.4.1.$#{filter}.1.$#{size}']")
 
-  case filter 
-
-    when "Tops & Outerwear"
-      find("p[data-reactid='.4.2.3.0.0.0.4.1.$Tops & Outerwear.1.$#{size}']").click
-      sleep 0.5
-
-    when "Bottoms & Pants"
-      find("p[data-reactid='.4.2.3.0.0.0.4.1.$Bottoms & Pants.1.$#{size}']").click
-      sleep 0.5
-
-    when "Footwear"
-      find("p[data-reactid='.4.2.3.0.0.0.4.1.$Footwear.1.$#{size}']").click
-      sleep 0.5
-
-    when "Tailoring"
-      find("p[data-reactid='.4.2.3.0.0.0.4.1.$Tailoring.1.$#{size}']").click
-      sleep 0.5
-
-    when "Accessories"
-      find("p[data-reactid='.4.2.3.0.0.0.4.1.$Accessories.1.$#{size}']").click
-      sleep 0.5
-
+  if has_css? size_choice
+    find(size_choice).click
+    sleep 0.5
   else
     fail "You selected a size filter that does not exist!"
   end
@@ -184,7 +171,6 @@ And(/^I check for the cheapest listing price$/) do
   end
 
   puts @price_array if @verbose
-    # puts @price_array.sort if @verbose #sort the area in ascending order
   puts @price_array.min if @verbose
   puts "Found the lowest price of #{@price_array.min}" if @verbose
 
@@ -256,6 +242,15 @@ And(/^I verify the seller feedback is good$/) do
   end
 end
 
+Given(/^I generate a new user$/) do
+  time = Time.now.to_i.to_s
+  stamp = time + [SecureRandom.hex].pack('H*').gsub(/[^0-9a-z]/i, '')
+  # @user_email = "bc+grailed+#{stamp}@mailinator.com"
+  @user_email = "bc+grailed+#{stamp}@gmail.com"
+  @user_password = "Password1"
+  puts "==> Generating New User ==> email: #{@user_email}" if @verbose
+end
+
 ############helper############
 def scroll_to(element)
   script = <<-JS
@@ -268,3 +263,9 @@ def open_new_tab
   driver = Selenium::WebDriver.for:chrome
   driver.keyboard.send_keys [:control, "t"]
 end
+
+def generate_code(number)
+  charset = Array('A'..'Z') + Array('a'..'z')
+  Array.new(number) { charset.sample }.join
+end
+ 
