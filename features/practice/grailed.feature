@@ -12,13 +12,13 @@ Scenario: A user uses the upper level category headers
   Given I visit grailed website
   And I click on the "footwear" category header
   Then I verify the "footwear" category is clicked under the category filter
-
+@wavy
 Scenario: A user searches for yeezys under footwear category and uses footwear size filter
   Given I visit grailed website
   And I click on the "footwear" category header
   And I verify the "footwear" category is clicked under the category filter
   When I search for "yeezy 700 waverunner" and I put sizes filter into view
-  And I select size "11" within the "Footwear" filter
+  And I select size "11=15" within the "Footwear" filter
   And I check for the cheapest listing price
   And I check the location of the item and shipping cost to "United States"
   And I verify the seller feedback is good
@@ -42,7 +42,7 @@ Scenario: A user searches for northface under outerwear category and uses tops &
   And I check for the cheapest listing price
   And I check the location of the item and shipping cost to "United States"
   And I verify the seller feedback is good
-
+@1
 Scenario: A user searches for supreme under tops category and uses tops & outerwear size filter
   Given I visit grailed website
   And I click on the "tops" category header

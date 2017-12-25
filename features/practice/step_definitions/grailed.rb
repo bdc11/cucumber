@@ -51,7 +51,8 @@ And(/^I click on the "([^"]*)" category header$/) do |header|
   end  
 end
 
-Then(/^I verify the "([^"]*)" category is clicked under the category filter$/) do |category|
+Then(/^I verify the "([^"]*)" category is clicked under the category filter$/) do |category|  
+  puts "Looking for page filters..." if @verbose
   begin
     side_filters = find("h3.filter-toggle", :text=>"SHOW FILTERS")
     assert side_filters
@@ -215,23 +216,32 @@ Then(/^I scroll down to see more products$/) do
   page.execute_script "window.scrollBy(0,3000)"
 end
 
+#TODO
 And(/^I check the location of the item and shipping cost to "([^"]*)"$/) do |shipping|
   puts "Checking the location of the item..." if @verbose
-  @seller_info = find("div.user-widget.medium", :wait=>0)
-  shipping_cost = find("div.listing-shipping")
-  scroll_to(shipping_cost)
-  seller_location = @seller_info.find("p.user-location")
+  @seller_info = ("div.user-widget.medium")
+  seller_box = find("div.listing-seller-profile")
+  scroll_to(seller_box)
+
+
+  seller_location = find(@seller_info).find("p.user-location")
   puts seller_location.text if @verbose
 
   puts "Checking shipping price..." if @verbose
-  shipping_cost = find("div.listing-shipping").find("div.item",:text=>shipping).find("div.amount")
 
+  shipping_info = ("div.listing-shipping")
+  if page.has_css? shipping_info
+    shipping_cost = find(shipping_info).find("div.item",:text=>shipping).find("div.amount")
+  end 
   puts "The item is located in #{seller_location.text} and shipping cost to #{shipping} is #{shipping_cost.text}"
 end
 
 And(/^I verify the seller feedback is good$/) do
-  assert @seller_info.find("a.green")
-  feedback = @seller_info.find("a.green").text 
+  if page.has_css? ("a.green")
+    feedback = find("div.right").find("a.green").text 
+  else
+    feedback = find("div.right").find("a").text
+  end 
 
   feedback_check = feedback.gsub("/5","").gsub("Feedback","")
 
@@ -240,6 +250,18 @@ And(/^I verify the seller feedback is good$/) do
   else
     puts "BEWARE! Seller has a feedback of #{feedback}!"
   end
+
+  seller_sales = find("div.right").find("h1.sub-title.semi-bold").find("a").text
+  seller_sales = seller_sales.gsub("(","").gsub(")","").split(" ")
+  seller_sales = seller_sales[1].to_i
+
+    if seller_sales <= 0
+      puts "BEWARE! Seller has zero prior sales!"
+    elsif seller_sales <= 5
+      puts "WARNING! Seller has very few sales. buy with caution!"
+    else
+      puts "Seller has #{seller_sales} sales!"
+    end
 end
 
 Given(/^I generate a new user$/) do
