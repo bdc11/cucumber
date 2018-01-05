@@ -103,8 +103,8 @@ end
 And(/^I log into my grailed account from the cell$/) do
   sleep 1
   modal = find("div.ReactModal__Content")
-  modal.find("input[type='email']").set "brandochang1993@gmail.com"
-  modal.find("input[type='password']").set("Chickent913").native.send_key(:enter)
+  modal.find("input[type='email']").set "kickz124@gmail.com"
+  modal.find("input[type='password']").set("Password1").native.send_key(:enter)
 end
 
 Then(/^I verify I am logged into my account$/) do
@@ -173,7 +173,7 @@ And(/^I check for the cheapest listing price$/) do
 
   puts @price_array if @verbose
   puts @price_array.min if @verbose
-  puts "Found the lowest price of #{@price_array.min}" if @verbose
+  puts "Found the lowest price of #{@price_array.min}"
 
   puts "================================================================================================="
   
@@ -198,7 +198,7 @@ And(/^I check for the cheapest listing price$/) do
         break
       end
     rescue
-      puts "Searching for listing with the lowest price..." if @verbose
+      puts "Searching for listing with the lowest price..." 
     ensure
       loop
     end
@@ -218,7 +218,7 @@ end
 
 #TODO
 And(/^I check the location of the item and shipping cost to "([^"]*)"$/) do |shipping|
-  puts "Checking the location of the item..." if @verbose
+  puts "Checking the location of the item..." 
   @seller_info = ("div.user-widget.medium")
   seller_box = find("div.listing-seller-profile")
   scroll_to(seller_box)
@@ -227,7 +227,7 @@ And(/^I check the location of the item and shipping cost to "([^"]*)"$/) do |shi
   seller_location = find(@seller_info).find("p.user-location")
   puts seller_location.text if @verbose
 
-  puts "Checking shipping price..." if @verbose
+  puts "Checking shipping price..." 
 
   shipping_info = ("div.listing-shipping")
   if page.has_css? shipping_info
@@ -267,10 +267,14 @@ end
 Given(/^I generate a new user$/) do
   time = Time.now.to_i.to_s
   stamp = time + [SecureRandom.hex].pack('H*').gsub(/[^0-9a-z]/i, '')
+  rand_numbers = SecureRandom.hex(13)
   # @user_email = "bc+grailed+#{stamp}@mailinator.com"
-  @user_email = "bc+grailed+#{stamp}@gmail.com"
+  # @user_email = "bcgrailed#{stamp}@gmail.com"
+  @user_email = "bcrandemail#{stamp}@gmail.com"
+  @user_name = "bcranduser#{rand_numbers}"
   @user_password = "Password1"
-  puts "==> Generating New User ==> email: #{@user_email}" if @verbose
+  puts "==> Generating New User Email ==> email: #{@user_email}" if @verbose
+  puts "==> Generating New User Name ==> email: #{@user_name}" if @verbose
 end
 
 ############helper############
